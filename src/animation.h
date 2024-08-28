@@ -28,6 +28,7 @@
 #include <QPixmap>
 #include <QTimer>
 #include <QPaintEvent>
+#include <QPainterPath>
 
 class Animation : public QWidget
 {

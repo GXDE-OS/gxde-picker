@@ -29,6 +29,7 @@
 #include <QAction>
 #include <QColor>
 #include <QPaintEvent>
+#include <QPainterPath>
 
 class ColorMenu : public QWidget
 {
