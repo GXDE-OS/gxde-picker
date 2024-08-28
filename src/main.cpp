@@ -49,10 +49,10 @@ int main(int argc, char *argv[])
     // Init attributes.
     const char *descriptionText = QT_TRANSLATE_NOOP(
         "MainWindow",
-        "Deepin Picker is a quick and easy screen color picking tool. RGB and HEX codes "
+        "GXDE Picker is a quick and easy screen color picking tool. RGB and HEX codes "
         "are obtained on click and auto saved to the clipboard.");
 
-    const QString acknowledgementLink = "https://www.deepin.org/acknowledgments/deepin-picker";
+    const QString acknowledgementLink = "https://gitee.com/GXDE-OS/gxde-picker";
 
     // Init dtk application's attrubites.
     DApplication app(argc, argv);
@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
 
     app.loadTranslator();
 
-    app.setOrganizationName("deepin");
-    app.setApplicationName("deepin-picker");
+    app.setOrganizationName("GXDE");
+    app.setApplicationName("gxde-picker");
     app.setApplicationVersion("1.2");
 
     app.setProductIcon(QIcon(Utils::getQrcPath("logo_96.svg")));
-    app.setProductName(DApplication::translate("MainWindow", "Deepin Picker"));
+    app.setProductName(DApplication::translate("MainWindow", "GXDE Picker"));
     app.setApplicationDescription(DApplication::translate("MainWindow", descriptionText) + "\n");
     app.setApplicationAcknowledgementPage(acknowledgementLink);
 

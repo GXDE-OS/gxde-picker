@@ -11,11 +11,11 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <source>Deepin Picker is a quick and easy screen color picking tool. RGB and HEX codes are obtained on click and auto saved to the clipboard.</source>
+        <source>GXDE Picker is a quick and easy screen color picking tool. RGB and HEX codes are obtained on click and auto saved to the clipboard.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Deepin Picker</source>
+        <source>GXDE Picker</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -3,12 +3,12 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = deepin-picker
+TARGET = gxde-picker
 
 CONFIG += link_pkgconfig
 CONFIG += c++11 
 PKGCONFIG += xcb xcb-util dtkwidget 
-RESOURCES = deepin-picker.qrc
+RESOURCES = gxde-picker.qrc
 
 # Input
 HEADERS += src/picker.h \		   		   
@@ -47,8 +47,8 @@ isEmpty(PREFIX){
 isEmpty(BINDIR):BINDIR=/usr/bin
 isEmpty(ICONDIR):ICONDIR=/usr/share/icons/hicolor/scalable/apps
 isEmpty(APPDIR):APPDIR=/usr/share/applications
-isEmpty(DSRDIR):DSRDIR=/usr/share/deepin-picker
-isEmpty(DOCDIR):DOCDIR=/usr/share/dman/deepin-picker
+isEmpty(DSRDIR):DSRDIR=/usr/share/gxde-picker
+isEmpty(DOCDIR):DOCDIR=/usr/share/dman/gxde-picker
 
 target.path = $$INSTROOT$$BINDIR
 icon.path = $$INSTROOT$$ICONDIR
@@ -56,8 +56,8 @@ desktop.path = $$INSTROOT$$APPDIR
 translations.path = $$INSTROOT$$DSRDIR/translations
 manual.path = $$INSTROOT$$DOCDIR
 
-icon.files = image/deepin-picker.svg
-desktop.files = deepin-picker.desktop
+icon.files = image/gxde-picker.svg
+desktop.files = gxde-picker.desktop
 manual.files = manual/*
 
 dbus_service.files = $$PWD/com.deepin.Picker.service

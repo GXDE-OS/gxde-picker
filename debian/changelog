@@ -1,4 +1,12 @@
-deepin-picker (1.0.0-1) unstable; urgency=medium
+gxde-picker (1.6.7) UNRELEASED; urgency=medium
+
+  * Non-maintainer upload.
+  * 
+  * 
+
+ -- gfdgd_xi <3025613752@qq.com>  Wed, 28 Aug 2024 19:01:18 +0800
+
+gxde-picker (1.0.0-1) unstable; urgency=medium
 
   * Initial Release.
 
