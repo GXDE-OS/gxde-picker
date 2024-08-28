@@ -60,7 +60,7 @@ icon.files = image/gxde-picker.svg
 desktop.files = gxde-picker.desktop
 manual.files = manual/*
 
-dbus_service.files = $$PWD/com.deepin.Picker.service
+dbus_service.files = $$PWD/com.gxde.Picker.service
 dbus_service.path = $$PREFIX/share/dbus-1/services
 
 INSTALLS += target icon desktop manual dbus_service
