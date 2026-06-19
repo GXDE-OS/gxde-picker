@@ -35,7 +35,7 @@
 #include <QStyleFactory>
 #include <QScreen>
 #include <QApplication>
-#include <QDesktopWidget>
+// #include <QDesktopWidget>
 #include <QDebug>
 
 Picker::Picker(bool launchByDBus)

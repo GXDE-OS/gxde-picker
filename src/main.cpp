@@ -26,7 +26,7 @@
 #include <QDBusConnection>
 #include <QApplication>
 #include <QScreen>
-#include <QDesktopWidget>
+// #include <QDesktopWidget>
 #include <QCommandLineParser>
 #include <DWidgetUtil>
 #include <QProcess>
