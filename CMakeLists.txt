@@ -93,13 +93,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 )
 
 # ---------- 翻译处理 ----------
-file(GLOB TS_FILES LIST_DIRECTORIES false translations/deepin-picker*.ts)
-
-# 用于 lupdate 的源文件
-set(UPDATE_SOURCES ${SOURCES} ${HEADERS})
-
-qt6_create_translation(QM_FILES ${UPDATE_SOURCES} ${TS_FILES}
-    OPTIONS -no-obsolete -locations none
+add_custom_target(generate_translations ALL
+    COMMAND sh -c "/usr/lib/qt6/bin/lupdate ./src/* -ts ./translations/*.ts -no-obsolete"
+    COMMAND sh -c "/usr/lib/qt6/bin/lrelease ./translations/*.ts -qm ./translations/*.qm"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating translation files"
+    VERBATIM
 )
 
 install(FILES ${QM_FILES}
@@ -109,16 +108,8 @@ install(FILES ${QM_FILES}
 # ---------- 安装 ----------
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
-install(FILES image/gxde-picker.svg
-    DESTINATION share/icons/hicolor/scalable/apps
-)
-
 install(FILES gxde-picker.desktop
     DESTINATION share/applications
-)
-
-install(DIRECTORY manual/
-    DESTINATION share/dman/${PROJECT_NAME}
 )
 
 install(FILES com.gxde.Picker.service
