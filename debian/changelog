@@ -1,3 +1,10 @@
+gxde-picker (2.0.1) UNRELEASED; urgency=medium
+
+  [ zeqi ]
+  * 完善对简体中文的支持
+
+ -- zeqi <a202128502@163.com>  Thu, 30 Jul 2026 12:24:56 +0800
+
 gxde-picker (2.0.0) UNRELEASED; urgency=medium
 
   * Qt6 迁移
