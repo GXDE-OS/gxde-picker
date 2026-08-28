@@ -33,6 +33,7 @@
 #include <DWindowManagerHelper>
 #include <QDebug>
 #include <QPointer>
+#include <QTimer>
 #include <iostream>
 #include "utils.h"
 #include "clipboard.h"
@@ -43,8 +44,15 @@ DWIDGET_USE_NAMESPACE
 
 int main(int argc, char *argv[])
 {
-    // Load DTK xcb plugin.
-    DApplication::loadDXcbPlugin();
+    const bool waylandSession =
+        qEnvironmentVariable("XDG_SESSION_TYPE").compare(QStringLiteral("wayland"),
+                                                          Qt::CaseInsensitive) == 0 &&
+        !qEnvironmentVariableIsEmpty("WAYLAND_DISPLAY");
+    if (waylandSession) {
+        qputenv("QT_QPA_PLATFORM", QByteArrayLiteral("wayland"));
+    } else {
+        DApplication::loadDXcbPlugin();
+    }
 
     // Init attributes.
     const char *descriptionText = QT_TRANSLATE_NOOP(
@@ -56,8 +64,9 @@ int main(int argc, char *argv[])
 
     // Init dtk application's attrubites.
     DApplication app(argc, argv);
+    const bool isWayland = QGuiApplication::platformName().startsWith(QStringLiteral("wayland"));
 
-    if (!DWindowManagerHelper::instance()->hasComposite()) {
+    if (!isWayland && !DWindowManagerHelper::instance()->hasComposite()) {
         Utils::warnNoComposite();
         return 0;
     }
@@ -87,9 +96,6 @@ int main(int argc, char *argv[])
     // Init modules.
     Clipboard clipboard;
     QPointer<Picker> picker = new Picker(isLaunchByDBus);
-    if (!isLaunchByDBus) {
-        picker->StartPick("");
-    }
 
     EventMonitor eventMonitor;
 
@@ -131,8 +137,9 @@ int main(int argc, char *argv[])
     QObject::connect(&eventMonitor, &EventMonitor::leftButtonPress, picker.data(), &Picker::handleLeftButtonPress, Qt::QueuedConnection);
     QObject::connect(&eventMonitor, &EventMonitor::rightButtonRelease, picker.data(), &Picker::handleRightButtonRelease, Qt::QueuedConnection);
 
-    // Start event monitor thread.
-    eventMonitor.start();
+    if (!isWayland) {
+        eventMonitor.start();
+    }
 
     if (isLaunchByDBus) {
         QDBusConnection dbus = QDBusConnection::sessionBus();
@@ -141,5 +148,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    return app.exec();
+    if (!isLaunchByDBus) {
+        QTimer::singleShot(0, picker.data(), [picker] {
+            if (picker) {
+                picker->StartPick("");
+            }
+        });
+    }
+
+    const int result = app.exec();
+    delete picker.data();
+    return result;
 }

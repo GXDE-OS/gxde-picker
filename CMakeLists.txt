@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
-project(gxde-picker LANGUAGES CXX)
+project(gxde-picker LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # 自动处理 Qt 的 MOC、UIC、RCC
 set(CMAKE_AUTOMOC ON)
@@ -23,6 +25,8 @@ find_package(Qt6 REQUIRED COMPONENTS
 # ---------- DTK 依赖（dtk2widget + Dtk6）----------
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(DTK2Widget REQUIRED dtk2widget)
+pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
+pkg_check_modules(EGL REQUIRED egl)
 
 # 使用 Dtk6 的核心和 GUI 模块（即使暂时未直接调用，保证兼容）
 find_package(Dtk6Core REQUIRED)
@@ -43,6 +47,9 @@ set(SOURCES
     src/dbusnotify.cpp
     src/settings.cpp
     src/utils.cpp
+    src/waylandcapture.cpp
+    src/protocols/kywc-capture-v1-protocol.c
+    src/protocols/kywc-output-v1-protocol.c
 )
 
 set(HEADERS
@@ -54,6 +61,9 @@ set(HEADERS
     src/dbusnotify.h
     src/settings.h
     src/utils.h
+    src/waylandcapture.h
+    src/protocols/kywc-capture-v1-client-protocol.h
+    src/protocols/kywc-output-v1-client-protocol.h
 )
 
 set(RESOURCES
@@ -70,12 +80,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${Dtk6Core_INCLUDE_DIRS}
     ${Dtk6Gui_INCLUDE_DIRS}
     ${XCB_INCLUDE_DIRS}
+    ${WAYLAND_CLIENT_INCLUDE_DIRS}
+    ${EGL_INCLUDE_DIRS}
 )
 
 # ---------- 链接库 ----------
 target_link_libraries(${PROJECT_NAME}
     Qt6::Core
     Qt6::Gui
+    Qt6::GuiPrivate
     Qt6::Widgets
     Qt6::Network
     Qt6::DBus
@@ -85,6 +98,8 @@ target_link_libraries(${PROJECT_NAME}
     Dtk6::Gui                               # DTK6 GUI
     ${XCB_LIBRARIES}                        # xcb 和 xcb-util
     X11::X11 X11::Xext X11::Xtst            # X11 扩展
+    ${WAYLAND_CLIENT_LIBRARIES}
+    ${EGL_LIBRARIES}
 )
 
 # ---------- 编译宏 ----------

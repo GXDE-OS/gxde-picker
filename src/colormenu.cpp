@@ -32,11 +32,13 @@
 #include <QPainter>
 #include <QApplication>
 #include <QDebug>
+#include <QGuiApplication>
 
 ColorMenu::ColorMenu(int x, int y, int size, QColor color, QWidget *parent) : QWidget(parent)
 {
     // Init window flags.
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+    const bool isWayland = QGuiApplication::platformName().startsWith(QStringLiteral("wayland"));
+    setWindowFlags(Qt::FramelessWindowHint | (isWayland ? Qt::Popup : Qt::Tool));
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
     installEventFilter(this);
@@ -61,7 +63,7 @@ ColorMenu::ColorMenu(int x, int y, int size, QColor color, QWidget *parent) : QW
     this->setGraphicsEffect(effect);
 
     // Build menu and menu actions.
-    colorMenu = new QMenu();
+    colorMenu = new QMenu(this);
     connect(colorMenu, &QMenu::aboutToHide, this, [&]() {
         QTimer::singleShot(200, this, [&]() {
             if (!clickMenuItem) {

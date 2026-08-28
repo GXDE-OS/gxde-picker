@@ -30,6 +30,10 @@
 #include "animation.h"
 #include <QAction>
 #include <QTimer>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEnterEvent>
+#include "waylandcapture.h"
 
 class Picker : public QWidget
 {
@@ -60,15 +64,21 @@ public slots:
     
 protected:
     void paintEvent(QPaintEvent *);
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void enterEvent(QEnterEvent *event) override;
     
 private:
-    Animation *animation;
-    ColorMenu *menu;
+    Animation *animation = nullptr;
+    ColorMenu *menu = nullptr;
     QPixmap screenPixmap;
     QPixmap screenshotPixmap;
     QTimer *updateScreenshotTimer;
     QColor cursorColor;
     QPixmap shadowPixmap;
+    QPixmap magnifierPixmap;
     bool displayCursorDot;
     int blockHeight;
     int blockWidth;
@@ -80,7 +90,13 @@ private:
     int windowHeight;
     int windowWidth;
     bool isLaunchByDBus;
+    bool isWayland;
     QString appid;
-};	
+    WaylandCapture waylandCapture;
+    bool hasCursorOverride = false;
+
+    void hideSystemCursor();
+    void restoreSystemCursor();
+};
 
 #endif

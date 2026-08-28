@@ -27,11 +27,16 @@
 #include <QColor>
 #include <QPainter>
 #include <QDebug>
+#include <QGuiApplication>
 
 Animation::Animation(int x, int y, QPixmap pixmap, QColor color, QWidget *parent) : QWidget(parent)
 {
     // Init window flags to make window transparent and get correctly behavior.
-    setWindowFlags(Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool);
+    Qt::WindowFlags flags = Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool;
+    if (QGuiApplication::platformName().startsWith(QStringLiteral("xcb"))) {
+        flags |= Qt::X11BypassWindowManagerHint;
+    }
+    setWindowFlags(flags);
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
     installEventFilter(this);
@@ -101,4 +106,3 @@ void Animation::renderAnimation()
         emit finish();
     }
 }
-
