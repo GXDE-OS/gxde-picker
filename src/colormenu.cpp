@@ -63,7 +63,12 @@ ColorMenu::ColorMenu(int x, int y, int size, QColor color, QWidget *parent) : QW
     this->setGraphicsEffect(effect);
 
     // Build menu and menu actions.
-    colorMenu = new QMenu(this);
+    if (isWayland) {
+        colorMenu = new QMenu(this);
+    }else{
+        colorMenu = new QMenu();
+    }
+
     connect(colorMenu, &QMenu::aboutToHide, this, [&]() {
         QTimer::singleShot(200, this, [&]() {
             if (!clickMenuItem) {

@@ -75,20 +75,33 @@ Picker::Picker(bool launchByDBus)
     updateScreenshotTimer->setSingleShot(true);
     connect(updateScreenshotTimer, SIGNAL(timeout()), this, SLOT(updateScreenshot()));
 
-    QScreen *screen = QApplication::primaryScreen();
-    if (screen) {
-        resize(screen->geometry().size());
-        move(screen->geometry().topLeft());
-        cursorX = screen->geometry().center().x();
-        cursorY = screen->geometry().center().y();
+    if (isWayland) {
+        QScreen *screen = QApplication::primaryScreen();
+        if (screen) {
+            resize(screen->geometry().size());
+            move(screen->geometry().topLeft());
+            cursorX = screen->geometry().center().x();
+            cursorY = screen->geometry().center().y();
+        }
+    }else{
+        screenPixmap = QApplication::primaryScreen()->grabWindow(0);
+        resize(screenPixmap.size());
+        move(0, 0);
     }
+
 }
 
 Picker::~Picker()
 {
-    restoreSystemCursor();
-    delete animation;
-    delete menu;
+    if (isWayland) {
+        restoreSystemCursor();
+        delete animation;
+        delete menu;
+    }else{
+        animation->deleteLater();
+        menu->deleteLater();
+        updateScreenshotTimer->deleteLater();
+    }
 }
 
 void Picker::paintEvent(QPaintEvent *)
@@ -108,8 +121,10 @@ void Picker::paintEvent(QPaintEvent *)
 
 void Picker::handleMouseMove(int x, int y)
 {
-    cursorX = x;
-    cursorY = y;
+    if (isWayland) {
+        cursorX = x;
+        cursorY = y;
+    }
 
     if (updateScreenshotTimer->isActive()) {
         updateScreenshotTimer->stop();
@@ -121,39 +136,62 @@ void Picker::updateScreenshot()
 {
     if (!displayCursorDot && isVisible()) {
         QScreen *screen = QApplication::primaryScreen();
-        if (!screen || screenPixmap.isNull()) {
-            return;
+        if (isWayland) {
+            if (!screen || screenPixmap.isNull()) {
+                return;
+            }
+        }else{
+            cursorX = QCursor::pos().x();
+            cursorY = QCursor::pos().y();
         }
 
         // Need add offset to make drop shadow's position correctly.
         int offsetX = (windowWidth - width) / 2;
         int offsetY = (windowHeight - height) / 2;
 
-        // Get image under cursor.
-        const qreal devicePixelRatio = screen->devicePixelRatio();
-        const QRect screenGeometry = screen->geometry();
-        const qreal scaleX = qreal(screenPixmap.width()) / screenGeometry.width();
-        const qreal scaleY = qreal(screenPixmap.height()) / screenGeometry.height();
-        const int pixelX = qRound((cursorX - screenGeometry.left()) * scaleX);
-        const int pixelY = qRound((cursorY - screenGeometry.top()) * scaleY);
+        QPixmap cursorPixmap; 
+
+        if (isWayland) {
+            // Get image under cursor.
+            const qreal devicePixelRatio = screen->devicePixelRatio();
+            const QRect screenGeometry = screen->geometry();
+            const qreal scaleX = qreal(screenPixmap.width()) / screenGeometry.width();
+            const qreal scaleY = qreal(screenPixmap.height()) / screenGeometry.height();
+            const int pixelX = qRound((cursorX - screenGeometry.left()) * scaleX);
+            const int pixelY = qRound((cursorY - screenGeometry.top()) * scaleY);
         
-        const int sourceWidth = screenshotSize;
-        const int sourceHeight = screenshotSize;
-        const QRect source(pixelX - sourceWidth / 2, pixelY - sourceHeight / 2,
+            const int sourceWidth = screenshotSize;
+            const int sourceHeight = screenshotSize;
+            const QRect source(pixelX - sourceWidth / 2, pixelY - sourceHeight / 2,
                            sourceWidth, sourceHeight);
-        screenshotPixmap = QPixmap::fromImage(screenPixmap.toImage().copy(source));
-        screenshotPixmap = screenshotPixmap.scaled(qRound(width * devicePixelRatio),
+            screenshotPixmap = QPixmap::fromImage(screenPixmap.toImage().copy(source));
+            screenshotPixmap = screenshotPixmap.scaled(qRound(width * devicePixelRatio),
                                                    qRound(height * devicePixelRatio),
                                                    Qt::KeepAspectRatio,
                                                    Qt::FastTransformation);
-        screenshotPixmap.setDevicePixelRatio(devicePixelRatio);
+            screenshotPixmap.setDevicePixelRatio(devicePixelRatio);
 
-        QPixmap cursorPixmap = shadowPixmap.scaled(
-            qRound(windowWidth * devicePixelRatio),
-            qRound(windowHeight * devicePixelRatio),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation);
-        cursorPixmap.setDevicePixelRatio(devicePixelRatio);
+            cursorPixmap = shadowPixmap.scaled(
+                qRound(windowWidth * devicePixelRatio),
+                qRound(windowHeight * devicePixelRatio),
+                Qt::IgnoreAspectRatio,
+                Qt::SmoothTransformation);
+            cursorPixmap.setDevicePixelRatio(devicePixelRatio);
+        }else{
+            qreal devicePixelRatio = qApp->devicePixelRatio();
+            int size = screenshotSize / devicePixelRatio;
+            screenshotPixmap = QApplication::primaryScreen()->grabWindow(
+                0,
+                cursorX - size / 2,
+                cursorY - size / 2,
+                size,
+                size).scaled(width * devicePixelRatio, height * devicePixelRatio);
+
+            // Clip screenshot pixmap to circle.
+            // NOTE: need copy pixmap here, otherwise we will got bad circle.
+            cursorPixmap = shadowPixmap;
+        }
+
         QPainter painter(&cursorPixmap);
         painter.setRenderHint(QPainter::Antialiasing, true);
 
@@ -161,7 +199,11 @@ void Picker::updateScreenshot()
         QPainterPath circlePath;
         circlePath.addEllipse(2 + offsetX, 2 + offsetY, width - 4, height - 4);
         painter.setClipPath(circlePath);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+
+        if (isWayland) {
+            painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+        }
+
         painter.drawPixmap(1 + offsetX, 1 + offsetY, screenshotPixmap);
         painter.restore();
 
@@ -197,7 +239,7 @@ void Picker::updateScreenshot()
         } else {
             // A widget-local cursor avoids leaking one application override
             // cursor per motion event.
-            setCursor(QCursor(cursorPixmap));
+            QApplication::setOverrideCursor(QCursor(cursorPixmap));
         }
     }
 }
@@ -208,8 +250,13 @@ void Picker::handleLeftButtonPress(int x, int y)
         // Rest cursor and hide window.
         // NOTE: Don't call hide() at here, let process die,
         // Otherwise mouse event will pass to application window under picker.
-        restoreSystemCursor();
-        unsetCursor();
+
+        if (!isWayland) {
+            QApplication::setOverrideCursor(Qt::ArrowCursor);
+        }else{
+            restoreSystemCursor();
+            unsetCursor();
+        }
 
         // Rest color type to hex if config file not exist.
         Settings settings;
@@ -234,12 +281,23 @@ void Picker::handleRightButtonRelease(int x, int y)
         cursorColor = getColorAtCursor(x, y);
 
         // Popup color menu window.
-        menu = new ColorMenu(
-            x - blockWidth / 2,
-            y - blockHeight / 2,
-            blockWidth,
-            cursorColor,
-            this);
+        qreal devicePixelRatio = qApp->devicePixelRatio();
+        
+        if (isWayland) {
+            menu = new ColorMenu(
+                x - blockWidth / 2,
+                y - blockHeight / 2,
+                blockWidth,
+                cursorColor,
+                this);
+        }else{
+            menu = new ColorMenu(
+                x / devicePixelRatio - blockWidth / 2,
+                y / devicePixelRatio - blockHeight / 2,
+                blockWidth,
+                cursorColor);
+        }
+
         connect(menu, &ColorMenu::copyColor, this, &Picker::copyColor, Qt::QueuedConnection);
         connect(menu, &ColorMenu::exit, this, &Picker::exit, Qt::QueuedConnection);
         menu->show();
@@ -256,12 +314,21 @@ void Picker::handleRightButtonRelease(int x, int y)
         }
 
         // Display animation before poup color menu.
-        animation = new Animation(x, y, screenshotPixmap, cursorColor);
+        if (isWayland) {
+            animation = new Animation(x, y, screenshotPixmap, cursorColor);
+        }else{
+            animation = new Animation(x / devicePixelRatio, y / devicePixelRatio, screenshotPixmap, cursorColor);
+        }
+
         connect(animation, &Animation::finish, this, &Picker::popupColorMenu, Qt::QueuedConnection);
 
         // Rest cursor to default cursor.
-        restoreSystemCursor();
-        unsetCursor();
+        if (isWayland) {
+            restoreSystemCursor();
+            unsetCursor();
+        }else{
+            QApplication::setOverrideCursor(Qt::ArrowCursor);
+        }
 
         // Show animation after rest cursor to avoid flash screen.
         animation->show();
@@ -270,19 +337,24 @@ void Picker::handleRightButtonRelease(int x, int y)
 
 QColor Picker::getColorAtCursor(int x, int y)
 {
-    QScreen *screen = QApplication::primaryScreen();
-    if (!screen || screenPixmap.isNull()) {
-        return QColor();
-    }
+    if (isWayland) {
+        QScreen *screen = QApplication::primaryScreen();
+        if (!screen || screenPixmap.isNull()) {
+            return QColor();
+        }
 
-    const QRect geometry = screen->geometry();
-    const qreal scaleX = qreal(screenPixmap.width()) / geometry.width();
-    const qreal scaleY = qreal(screenPixmap.height()) / geometry.height();
-    const int pixelX = qBound(0, qRound((x - geometry.left()) * scaleX),
+        const QRect geometry = screen->geometry();
+        const qreal scaleX = qreal(screenPixmap.width()) / geometry.width();
+        const qreal scaleY = qreal(screenPixmap.height()) / geometry.height();
+        const int pixelX = qBound(0, qRound((x - geometry.left()) * scaleX),
                               screenPixmap.width() - 1);
-    const int pixelY = qBound(0, qRound((y - geometry.top()) * scaleY),
+        const int pixelY = qBound(0, qRound((y - geometry.top()) * scaleY),
                               screenPixmap.height() - 1);
-    return QColor(screenPixmap.toImage().pixel(pixelX, pixelY));
+        return QColor(screenPixmap.toImage().pixel(pixelX, pixelY));
+    }else{
+        screenPixmap = QApplication::primaryScreen()->grabWindow(0);
+        return QColor(screenPixmap.copy(x, y, 1, 1).toImage().pixel(0, 0));
+    }
 }
 
 void Picker::popupColorMenu()
