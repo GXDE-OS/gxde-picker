@@ -97,6 +97,12 @@ int main(int argc, char *argv[])
     Clipboard clipboard;
     QPointer<Picker> picker = new Picker(isLaunchByDBus);
 
+    if (!isWayland) {
+        if (!isLaunchByDBus) {
+            picker->StartPick("");
+        }
+    }
+
     EventMonitor eventMonitor;
 
     QObject::connect(qApp, &DApplication::destroyed, [&] { if (eventMonitor.isRunning()) eventMonitor.terminate(); });
@@ -148,15 +154,19 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (!isLaunchByDBus) {
-        QTimer::singleShot(0, picker.data(), [picker] {
-            if (picker) {
-                picker->StartPick("");
-            }
-        });
-    }
+    if (isWayland) { 
+        if (!isLaunchByDBus) {
+            QTimer::singleShot(0, picker.data(), [picker] {
+                if (picker) {
+                    picker->StartPick("");
+                }
+            });
+        }
 
-    const int result = app.exec();
-    delete picker.data();
-    return result;
+        const int result = app.exec();
+        delete picker.data();
+        return result;
+    }else{
+        return app.exec();
+    }
 }
