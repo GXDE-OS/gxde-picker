@@ -4,6 +4,7 @@
 <context>
     <name>Clipboard</name>
     <message>
+        <location filename="../src/clipboard.cpp" line="79"/>
         <source>Copy color %1 to clipboard</source>
         <translation>Цвет %1 скопирован в буфер обмена</translation>
     </message>
@@ -11,12 +12,14 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <source>Deepin Picker is a quick and easy screen color picking tool. RGB and HEX codes are obtained on click and auto saved to the clipboard.</source>
-        <translation>Deepin Picker - это инструмент для быстрого выбора цвета экрана. Коды RGB и HEX получаются по клику и автоматически сохраняются в буфер обмена.</translation>
+        <location filename="../src/main.cpp" line="58"/>
+        <source>GXDE Picker is a quick and easy screen color picking tool. RGB and HEX codes are obtained on click and auto saved to the clipboard.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Deepin Picker</source>
-        <translation>Сборщик Цветовых Кодов Deepin</translation>
+        <location filename="../src/main.cpp" line="81"/>
+        <source>GXDE Picker</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

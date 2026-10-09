@@ -22,6 +22,10 @@ find_package(Qt6 REQUIRED COMPONENTS
     LinguistTools
 )
 
+if(NOT TARGET Qt6::GuiPrivate)
+    find_package(Qt6 REQUIRED COMPONENTS GuiPrivate)
+endif()
+
 # ---------- DTK 依赖（dtk2widget + Dtk6）----------
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(DTK2Widget REQUIRED dtk2widget)
@@ -108,12 +112,10 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 )
 
 # ---------- 翻译处理 ----------
-add_custom_target(generate_translations ALL
-    COMMAND sh -c "/usr/lib/qt6/bin/lupdate ./src/* -ts ./translations/*.ts -no-obsolete"
-    COMMAND sh -c "/usr/lib/qt6/bin/lrelease ./translations/*.ts -qm ./translations/*.qm"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Generating translation files"
-    VERBATIM
+file(GLOB TS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations/gxde-picker_*.ts)
+qt_add_lrelease(${PROJECT_NAME}
+    TS_FILES ${TS_FILES}
+    QM_FILES_OUTPUT_VARIABLE QM_FILES
 )
 
 install(FILES ${QM_FILES}

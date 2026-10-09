@@ -4,6 +4,7 @@
 <context>
     <name>Clipboard</name>
     <message>
+        <location filename="../src/clipboard.cpp" line="79"/>
         <source>Copy color %1 to clipboard</source>
         <translation>نسخ اللون %1 إلى الحافظة </translation>
     </message>
@@ -11,12 +12,14 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <source>Deepin Picker is a quick and easy screen color picking tool. RGB and HEX codes are obtained on click and auto saved to the clipboard.</source>
-        <translation>منتقي الألوان لديبين هى أداة سريعة لإنتقاء الألوان على الشاشة ، ترميزات الألوان RGB و HEX  ، يمكن الحصول عليها بالنقر و تحفظ تلقائياً فى الحافظة .</translation>
+        <location filename="../src/main.cpp" line="58"/>
+        <source>GXDE Picker is a quick and easy screen color picking tool. RGB and HEX codes are obtained on click and auto saved to the clipboard.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Deepin Picker</source>
-        <translation>منتقي الألوان ديبين</translation>
+        <location filename="../src/main.cpp" line="81"/>
+        <source>GXDE Picker</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
