@@ -8,7 +8,7 @@ url="https://github.com/GXDE-OS/gxde-picker"
 license=('GPL-3.0-or-later')
 depends=('dtk2widget-qt6-git' 'dtk6core-git' 'qt6-base' 'qt6-svg' 'libx11' 'libxtst' 'wayland' 'libglvnd'
          'libgcc' 'libstdc++' 'glibc')
-makedepends=('git' 'cmake' 'ninja' 'pkgconf' 'qt6-tools')
+makedepends=('git' 'cmake' 'ninja' 'pkgconf' 'qt6-tools' 'dtk6gui-git' 'libxcb' 'xcb-util' 'libxext')
 provides=('gxde-picker')
 conflicts=('gxde-picker')
 source=()
