@@ -1,16 +1,17 @@
 # Maintainer: CharOfString <root@charofstring.cc>
-pkgname=gxde-picker-git
+pkgname=gxde-picker
 pkgver=2.0.4
 pkgrel=1
 pkgdesc='Color picker tool for GXDE'
 arch=('x86_64' 'aarch64')
 url="https://github.com/GXDE-OS/gxde-picker"
 license=('GPL-3.0-or-later')
-depends=('dtk2widget-qt6-git' 'dtk6core-git' 'qt6-base' 'qt6-svg' 'libx11' 'libxtst' 'wayland' 'libglvnd'
+depends=('dtk2widget-qt6' 'gxde-dtk6core' 'qt6-base' 'qt6-svg' 'libx11' 'libxtst' 'wayland' 'libglvnd'
          'libgcc' 'libstdc++' 'glibc')
-makedepends=('git' 'cmake' 'ninja' 'pkgconf' 'qt6-tools' 'dtk6gui-git' 'libxcb' 'xcb-util' 'libxext')
-provides=('gxde-picker')
-conflicts=('gxde-picker')
+makedepends=('git' 'cmake' 'ninja' 'pkgconf' 'qt6-tools' 'gxde-dtk6gui' 'libxcb' 'xcb-util' 'libxext')
+provides=("gxde-picker-git=$pkgver")
+conflicts=('gxde-picker-git')
+replaces=('gxde-picker-git')
 source=()
 sha512sums=()
 
